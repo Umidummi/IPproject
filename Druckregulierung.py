@@ -1,4 +1,4 @@
-#alle wichtigen libarys erstmal ein binden.
+#alle wichtigen libarys erstmal ein Binden.
 import serial
 import time
 import serial.tools.list_ports
