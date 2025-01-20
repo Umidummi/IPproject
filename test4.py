@@ -1,0 +1,11 @@
+import pandas as pd
+excelfile=input(r'bitte gebe den Pfad ein: ')
+df=pd.read_excel(excelfile)
+#data=pd.read_excel(excelfile, usecols=['Druck[mBar]:'])
+#zeitabstand=pd.read_excel(excelfile, usecols=['Zeitsabstand[s]: '])
+#print(f'Druck: {data} \n Zeit: {zeitabstand}')
+print(df.dtypes)
+print(df[['Druck[mBar]:', 'Zeitsabstand[s]: ']])
+print(df.at[0, 'Zeitsabstand[s]: '])
+a=list(df['Druck[mBar]:'])
+print(a)
