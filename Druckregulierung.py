@@ -152,3 +152,5 @@ def druckabfrage(ser, counter): #in dieser funktion pendelt es den Druck auf die
 
 choice()
 end()
+
+#neue änderung
