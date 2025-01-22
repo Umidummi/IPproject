@@ -2,6 +2,7 @@
 import serial
 import time
 import serial.tools.list_ports
+import pandas as pd
 #import numpy as np
 
 #der folgende Absatz sucht den usb port aus an dem sie die Vakuumpumpe(VP) aneschlossen haben
