@@ -1,6 +1,4 @@
-import pyautogui
-import time
-import subprocess
+
 
 # Pfad zum Programm
 programm_pfad = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
