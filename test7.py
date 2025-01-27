@@ -13,3 +13,4 @@ win32api.RegSetValueEx(key, 'MyNewValue', 0, win32con.REG_SZ, 'Hello, Registry!'
 
 # Close the key
 win32api.RegCloseKey(key)
+#123
