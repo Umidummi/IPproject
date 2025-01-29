@@ -1,16 +1,14 @@
+
 import win32api
-import win32con
-
-# Open a registry key
-key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER, 'Software\MyApp', 0, win32con.KEY_ALL_ACCESS)
-
-# Read a value
-value, regtype = win32api.RegQueryValueEx(key, 'MyValue')
-print(value)
-
-# Write a new value
-win32api.RegSetValueEx(key, 'MyNewValue', 0, win32con.REG_SZ, 'Hello, Registry!')
-
-# Close the key
-win32api.RegCloseKey(key)
-#123
+import win32com.client
+import time
+AcquisitionInstance = win32com.client.Dispatch('PSV.AcquisitionInstance')
+#print(app)
+#print(dir(app))
+app=AcquisitionInstance.GetApplication(True, 10000)
+print(app)
+print(dir(app))
+app.Application.Activate()
+eigenschaften=app.Application.Acquisition.ActiveProperties(1)
+print(eigenschaften)
+print(type(eigenschaften))
