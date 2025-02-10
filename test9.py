@@ -1,8 +1,8 @@
-import Druckregulierung
 import win32api
 import win32com.client
 import time
 import os
+import Druckregulierung
 
 
 def copy_binary_file(reference_file, new_file):
@@ -39,3 +39,27 @@ def createFile():
 AcquisitionInstance = win32com.client.Dispatch('PSV.AcquisitionInstance')
 app=AcquisitionInstance.GetApplication(True, 10000)
 print(app)
+app.Application.Activate()
+app.ActiveDocument=r''
+print(app.ActiveDocument.Name)
+referenceFile=input("Bitte gebe den Pfad der ersten Referenz messung ein: ")
+app.ActiveDocument=referenceFile
+print(app.ActiveDocument.Name)
+print( app.Application.Acquisition.ScanFileName)
+ordner=createFile()
+for i in range(10):
+    newFile=rf"{ordner}\Scan_{i+1}.svd"
+    print(newFile)
+    copy_binary_file(referenceFile, newFile)
+    app.Application.Acquisition.ScanFileName = newFile
+    app.Application.Acquisition.Scan(0)
+    print(app.Application.Acquisition.ScanFileName)
+    status=app.Application.Acquisition.State
+    while status==3: #wenn gescanned wird ist status 3, wenn fertig 0 und wenn abgebrochen 5
+        status = app.Application.Acquisition.State
+        print(type(status))
+        print(status)
+        time.sleep(2)
+    print(app.Application.ActiveDocument.Name)
+
+Druckregulierung.stufen()
