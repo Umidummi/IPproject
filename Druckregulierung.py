@@ -150,38 +150,6 @@ def druckabfrage(ser, counter): #in dieser funktion pendelt es den Druck auf die
         print("Bedingungen nicht erfüllt, erneuter Versuch...") #rekursiver aufruf der funktion solange die Bedingung nicht erfüllt ist
         return druckabfrage(ser, counter)
 
-def psvDruckKontrolle(): #diese Funkton ließt eine excel Tabelle ein wird die Drücke in mBar abfahren. Diese Funktion wird in anderren skripten aufgerufen, daher bitte nicht löschen auch wenn sie hier nicht direkt benutzt wird
-    try:
-        ser = serial.Serial(port=sp, baudrate=br, timeout=to)
-        print(f'Verbindung hergestellt mit {sp}')
-        try:
-            #hier wird die excel datei eingelesen und ein vektor generiert sobald der Pfad zu der Datei korrekt eingegeben wurde
-            excelfile = input(r'bitte gebe den Pfad ein: ')
-            df = pd.read_excel(excelfile)
-            #hier wird auch Zeit eingelsen, aber zukünftig soll die Zeit durch die kommunikation mit dem PVS programm bestimmt werden
-            points = list(df['Druck[mBar]:'])
-            print(points)
-        except FileNotFoundError:
-            print("Die Datei wurde nicht gefunden.")
-        except Exception as e:
-            print(f"Ein Fehler ist aufgetreten: {e}")
-
-
-        for counter in points: #hier werden die Ascii Symbole wie in Main funktion der VP gesendet
-            command = f'SP{counter}\r'
-            for char in command:
-                ser.write(char.encode('utf-8'))
-                print(f'Command gesendet: {char.strip()}')
-                time.sleep(0.2)
-            time.sleep(0.5)
-            response = ord(ser.readline().decode('utf-8').strip())
-            if response:
-                print(f'ACK=6 or NAK=21 : {response}')
-                antwort = druckabfrage(ser, counter)
-                print(f'typ von druckaktuell: {type(antwort)}')
-                print(f'Antwort Druck: {antwort}')
-            else:
-                print('keine Antwort. ')
 
 
 choice()
