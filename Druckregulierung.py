@@ -150,26 +150,19 @@ def druckabfrage(ser, counter): #in dieser funktion pendelt es den Druck auf die
         print("Bedingungen nicht erfüllt, erneuter Versuch...") #rekursiver aufruf der funktion solange die Bedingung nicht erfüllt ist
         return druckabfrage(ser, counter)
 
-def stufen(): #diese Funkton ließt eine excel Tabelle ein wird die Drücke in mBar abfahren
+def psvDruckKontrolle(): #diese Funkton ließt eine excel Tabelle ein wird die Drücke in mBar abfahren. Diese Funktion wird in anderren skripten aufgerufen, daher bitte nicht löschen auch wenn sie hier nicht direkt benutzt wird
     try:
         ser = serial.Serial(port=sp, baudrate=br, timeout=to)
         print(f'Verbindung hergestellt mit {sp}')
-#folgender auskommentierter Block ist eine alternative Möglichkeit ein vektor mit verschiedenen Drücken abzufahren
-#        SW = float(input('Startwert[mBar]: '))
-#        EW = float(input('Endwert[mBar]: '))
-#        schritte = int(input('Anzahl der Abtastungspunkte: '))
-#        druckhalten = float(input('Anzahl Sekunden, bei dem der Druck gehalten werden soll: '))  # zeit in sekunden, bei der druck gehalten werden soll
-#        points = np.linspace(SW, EW, schritte)
         try:
             #hier wird die excel datei eingelesen und ein vektor generiert sobald der Pfad zu der Datei korrekt eingegeben wurde
             excelfile = input(r'bitte gebe den Pfad ein: ')
             df = pd.read_excel(excelfile)
             #hier wird auch Zeit eingelsen, aber zukünftig soll die Zeit durch die kommunikation mit dem PVS programm bestimmt werden
-            druckhalten=df.at[0, 'Zeitsabstand[s]: ']
             points = list(df['Druck[mBar]:'])
             print(points)
         except FileNotFoundError:
-            print("Die Datei 'book2.xlsx' wurde nicht gefunden.")
+            print("Die Datei wurde nicht gefunden.")
         except Exception as e:
             print(f"Ein Fehler ist aufgetreten: {e}")
 
@@ -189,7 +182,7 @@ def stufen(): #diese Funkton ließt eine excel Tabelle ein wird die Drücke in m
                 print(f'Antwort Druck: {antwort}')
             else:
                 print('keine Antwort. ')
-            time.sleep(druckhalten)
+
 
 choice()
 end()
