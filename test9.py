@@ -24,7 +24,8 @@ def copy_binary_file(reference_file, new_file):
 
     print(f"Binary content copied from '{reference_file}' to '{new_file}'.")
 def createFile():
-    pfad=input('bitte gebe den pfad ein wo ein neuer ordner erstellt werden soll: ')
+    #pfad=input('bitte gebe den pfad ein wo ein neuer ordner erstellt werden soll: ')
+    pfad=r'D:\WIN7\Kirchwehm'
     name = input('Name des Ordners: ')
     folder_path = os.path.join(pfad, name)
 
@@ -44,9 +45,15 @@ def statusAbfrage():
         time.sleep(2)
         statusAbfrage()
     elif status==0:
+        print(type(status))
+        print(status)
         return 0
     elif status ==5:
+        print(type(status))
+        print(status)
         return 5
+    else :
+        print(f'neuer status: ', status)
 
 #diese Funkton ließt eine excel Tabelle ein wird die Drücke in mBar abfahren. Diese Funktion wird in anderren skripten aufgerufen, daher bitte nicht löschen auch wenn sie hier nicht direkt benutzt wird
 def psvDruckKontrolle(i):
@@ -81,8 +88,8 @@ def psvDruckKontrolle(i):
 def excelVectorGenerator1():
     while True:
         try:
-            excelfile = input(r'Bitte gebe den Pfad der Excel- oder CSV-Datei mit den Drücken ein: ')
-
+            #excelfile = input(r'Bitte gebe den Pfad der Excel- oder CSV-Datei mit den Drücken ein: ')
+            excelfile=r'D:\WIN7\Kirchwehm\dt.csv'
             # Überprüfen, ob die Datei existiert
             if not os.path.isfile(excelfile):
                 print("Die Datei wurde nicht gefunden.")
@@ -179,8 +186,8 @@ def druckabfrage(ser, counter): #in dieser funktion pendelt es den Druck auf die
     #berechnet die sekante der zwei Drücke im Betrag
     steigung=abs(druckdavor-druckaktuell)/druckdavor
     print(f'Steigung= {steigung}')
-    print(f'typ von druckaktuell: {type(druckaktuell)}')
-    print(f'typ von counter: {type(counter)}')
+    #print(f'typ von druckaktuell: {type(druckaktuell)}')
+    #print(f'typ von counter: {type(counter)}')
     #berechnet relativer Fehler zwischen zweiten Druckwert und Sollwert
     relerror=abs(druckaktuell-counter)/counter
     print(f'relativer Fehler= {relerror}')
@@ -215,22 +222,22 @@ app.Application.Activate()
 
 
 print(app.ActiveDocument.Name)
-referenceFile=input("Bitte gebe den Pfad der ersten Referenz messung ein: ")
+#referenceFile=input("Bitte gebe den Pfad der ersten Referenz messung ein: ")
+referenceFile=r'D:\WIN7\Kirchwehm\OG.svd'
 pressureVector=excelVectorGenerator1()
-app.Application.Acquisition.ScanFileName=referenceFile
-print(app.ActiveDocument.Name)
-print( app.Application.Acquisition.ScanFileName)
+print('app.ActiveDocument.Name', app.ActiveDocument.Name)
+print('app.Application.Acquisition.ScanFileName', app.Application.Acquisition.ScanFileName)
 ordnerNeu=createFile()
 for i in pressureVector:
     floatvoni=float(i)
     psvDruckKontrolle(floatvoni)
     newFile=rf"{ordnerNeu}\Scan_{i}.svd"
-    print(newFile)
+    print('Name der neuen Scandatei: ',newFile)
     copy_binary_file(referenceFile, newFile)
     app.Application.Acquisition.ScanFileName = newFile
-    print(app.Application.Acquisition.ScanFileName)
+    print('app.Application.Acquisition.ScanFileName: ', app.Application.Acquisition.ScanFileName)
     app.Application.Acquisition.Scan(0)
-    print(app.Application.ActiveDocument.Name)
+    print('app.Application.ActiveDocument.Name: ', app.Application.ActiveDocument.Name)
     if statusAbfrage()==1:
         continue
     elif statusAbfrage()==0:
