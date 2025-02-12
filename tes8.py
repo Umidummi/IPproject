@@ -49,7 +49,7 @@ print(app.ActiveDocument.Name)
 print( app.Application.Acquisition.ScanFileName)
 ordner=createFile()
 
-for i in range(10):
+for i in range(4):
     newFile=rf"{ordner}\Scan_{i+1}.svd"
     print(newFile)
     #if os.path.exists(newFile):

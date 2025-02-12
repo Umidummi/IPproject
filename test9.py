@@ -29,36 +29,31 @@ def createFile():
     name = input('Name des Ordners: ')
     folder_path = os.path.join(pfad, name)
 
-    # Überprüfen, ob der Ordner bereits existiert, und ihn erstellen
+    # Überprüfen, ob der Ordner bereits existiert, und ihn zu erstellen
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
         print(f"Ordner '{folder_path}' wurde erfolgreich erstellt.")
         return folder_path
     else:
         print(f"Der Ordner '{folder_path}' existiert bereits.")
+        createFile()
 
 def statusAbfrage():
     status = app.Application.Acquisition.State
+    print(type(status))
+    print(status)
     if status==3: #wenn gescanned wird ist status 3, wenn fertig 0 und wenn abgebrochen 5
-        print(type(status))
-        print(status)
         time.sleep(2)
-        statusAbfrage()
+        return statusAbfrage()
     elif status==0:
-        print(type(status))
-        print(status)
+        print('Scan war erfolgreich.')
         return 0
-    elif status ==5:
-        print(type(status))
-        print(status)
-        return 5
-    else :
+    else:
         print(f'neuer status: ', status)
-
+        return status
 #diese Funkton ließt eine excel Tabelle ein wird die Drücke in mBar abfahren. Diese Funktion wird in anderren skripten aufgerufen, daher bitte nicht löschen auch wenn sie hier nicht direkt benutzt wird
 def psvDruckKontrolle(i):
     try:
-        sp=portsuche()
         ser = serial.Serial(port=sp, baudrate=br, timeout=to)
         print(f'Verbindung hergestellt mit {sp}')
         druckBefehl = f'SP{i}\r'
@@ -73,13 +68,13 @@ def psvDruckKontrolle(i):
             antwort = druckabfrage(ser, i)
             print(f'typ von druckaktuell: {type(antwort)}')
             print(f'Druckaktuell: {(antwort)}')
+            return antwort
         else:
              print('keine Antwort. ')
     except serial.SerialException as e:
         print(f'Fehler: {repr(e)}')
     except UnicodeDecodeError as e:
         print(f'Fehler bei der Dekodierung: {repr(e)}')
-
     finally:
         if 'ser' in locals() and ser.is_open:
             ser.close()
@@ -89,7 +84,7 @@ def excelVectorGenerator1():
     while True:
         try:
             #excelfile = input(r'Bitte gebe den Pfad der Excel- oder CSV-Datei mit den Drücken ein: ')
-            excelfile=r'D:\WIN7\Kirchwehm\dt.csv'
+            excelfile = r'D:\WIN7\Kirchwehm\dt.csv'
             # Überprüfen, ob die Datei existiert
             if not os.path.isfile(excelfile):
                 print("Die Datei wurde nicht gefunden.")
@@ -193,7 +188,7 @@ def druckabfrage(ser, counter): #in dieser funktion pendelt es den Druck auf die
     print(f'relativer Fehler= {relerror}')
     if relerror<0.01 and steigung<0.05: # wenn rel. Fehler unter 1% und  sekante in Betrag unter 5% dann übergibt die funktion den zweiten Druck wert
         print(f'Druck eingestellt bei: {druckaktuell}mBar')
-        return 1
+        return druckaktuell
     else:
         print("Bedingungen nicht erfüllt, erneuter Versuch...") #rekursiver aufruf der funktion solange die Bedingung nicht erfüllt ist
         return druckabfrage(ser, counter)
@@ -214,6 +209,7 @@ def portsuche():
 
 br = 38400
 to = 1
+sp = portsuche()
 
 AcquisitionInstance = win32com.client.Dispatch('PSV.AcquisitionInstance')
 app=AcquisitionInstance.GetApplication(True, 10000)
@@ -230,7 +226,8 @@ print('app.Application.Acquisition.ScanFileName', app.Application.Acquisition.Sc
 ordnerNeu=createFile()
 for i in pressureVector:
     floatvoni=float(i)
-    psvDruckKontrolle(floatvoni)
+    DruckAktuell = psvDruckKontrolle(floatvoni)
+    print('DruckAktuell: ', DruckAktuell)
     newFile=rf"{ordnerNeu}\Scan_{i}.svd"
     print('Name der neuen Scandatei: ',newFile)
     copy_binary_file(referenceFile, newFile)
@@ -238,8 +235,11 @@ for i in pressureVector:
     print('app.Application.Acquisition.ScanFileName: ', app.Application.Acquisition.ScanFileName)
     app.Application.Acquisition.Scan(0)
     print('app.Application.ActiveDocument.Name: ', app.Application.ActiveDocument.Name)
-    if statusAbfrage()==1:
-        continue
-    elif statusAbfrage()==0:
+    status2 = statusAbfrage()
+    print('typ von Status: ', type(status2))
+    print(f'was ist der Status? ', status2)
+    if not status2 == 0:
         print('Messung wurde abgebrochen. ') #hier kann noch erweitert werden in dem erneut ein scan bei dem fehlgeschlagenen Druck wiederholt wird aber tbcl
+        break
+
 print('Messung erfolgreich abgeschlossen.')
