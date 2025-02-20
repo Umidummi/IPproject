@@ -36,7 +36,7 @@ def createFile():
         return folder_path
     else:
         print(f"Der Ordner '{folder_path}' existiert bereits.")
-        createFile()
+        return createFile()
 
 def statusAbfrage():
     status = app.Application.Acquisition.State
@@ -102,7 +102,7 @@ def excelVectorGenerator1():
                 print("CSV-Datei erfolgreich geladen.")
             else:
                 print("Nur Excel- (.xlsx, .xls) und CSV-Dateien (.csv) werden unterstützt.")
-                continue
+                excelVectorGenerator1()
             print("Verfügbare Spalten:", df.columns)
             # Entfernen von führenden/nachfolgenden Leerzeichen in den Spaltenüberschriften
             df.columns = df.columns.str.strip()
@@ -142,27 +142,6 @@ def excelVectorGenerator1():
             print(f"Ein Fehler ist aufgetreten: {e}")
             continue
 
-
-def excelVectorGenerator(): # hier wird die excel datei eingelesen und ein vektor generiert sobald der Pfad zu der Datei korrekt eingegeben wurde
-    try:
-        excelfile = input(r'bitte gebe den Pfad Exceldatei mit den Drücken ein: ')
-        df = pd.read_excel(excelfile)
-        print("Verfügbare Spalten:", df.columns)
-        # Entfernen von führenden/nachfolgenden Leerzeichen
-        df.columns = df.columns.str.strip()
-        # Überprüfen, ob die Spalte 'Drücke:' existiert
-        #if 'Drücke:' not in df.columns:
-        #    print("Spalte 'Drücke:' wurde nicht gefunden.")
-
-        points = list(df['Drücke:'])
-        print(points)
-        return points
-    except FileNotFoundError:
-        print("Die Datei wurde nicht gefunden.")
-        excelVectorGenerator()
-    except Exception as e:
-        print(f"Ein Fehler ist aufgetreten: {e}")
-        excelVectorGenerator()
 
 def druckabfrage(ser, counter): #in dieser funktion pendelt es den Druck auf die neue Vorgabe ein
     gp = 'GP\r'
@@ -207,6 +186,16 @@ def portsuche():
         if sp is None:
             print('Das Gerät wurde nicht gefunden.')
 
+def check_referenceFile():
+    # referenceFile=input("Bitte gebe den Pfad der ersten Referenz messung ein: ")
+    referenceFile = r'D:\WIN7\Kirchwehm\OG.svd'
+    if os.path.isfile(referenceFile):
+        print(f'Datei existiert: {referenceFile}')
+        return referenceFile
+    else:
+        print(f'die Datei existiert nicht: {referenceFile}')
+        check_referenceFile()
+
 br = 38400
 to = 1
 sp = portsuche()
@@ -218,8 +207,7 @@ app.Application.Activate()
 
 
 print(app.ActiveDocument.Name)
-#referenceFile=input("Bitte gebe den Pfad der ersten Referenz messung ein: ")
-referenceFile=r'D:\WIN7\Kirchwehm\OG.svd'
+referenceFile=check_referenceFile()
 pressureVector=excelVectorGenerator1()
 print('app.ActiveDocument.Name', app.ActiveDocument.Name)
 print('app.Application.Acquisition.ScanFileName', app.Application.Acquisition.ScanFileName)
