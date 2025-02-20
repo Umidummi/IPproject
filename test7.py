@@ -15,33 +15,50 @@ def excelVectorGenerator0():
 
         if file_extension == 'xlsx' or file_extension == 'xls':
             # Excel-Datei einlesen
-            df = pd.read_excel(excelfile)
-            print(f'df: {df}')
+            df = pd.read_excel(excelfile, header=None)
+            print(f'df:\n {df}')
             print("Excel-Datei erfolgreich geladen.")
+            rownum = df.shape[0]
+            print('Anzahl der Zeilen: ',rownum)
+            for i in range(rownum):
+                row=df.iloc[i].tolist()
+                if 'Drücke' in row:
+                    header = row
+            df.columns = header
+            print(f"Erste Zeilen der Datei:\n{df.head()}")
         elif file_extension == 'csv': # CSV-Datei einlesen
-            df = pd.read_csv(excelfile)
+            trennzeichen=input('Bitte gebe das Trennsymbol der CSV datei ein.')
+            df = pd.read_csv(excelfile, sep=trennzeichen, encoding='latin1')
             print(f'df: {df}')
             print("CSV-Datei erfolgreich geladen.")
+            header = df.columns.tolist()
         else:
             print("Nur Excel- (.xlsx, .xls) und CSV-Dateien (.csv) werden unterstützt.")
             return excelVectorGenerator0()
-        print("Verfügbare Spalten:", df.columns)
-        print('df.header = ', df.header)
-        # Überprüfen, ob eine der Spalten 'Drücke:' enthält, unabhängig von zusätzlichen Zeichen
-        columns = df.header.split(';')
+
+        #print(f"Erste Zeilen der Datei:\n{df.head()}")
+
+
+        print("Spaltennamen:", header)
+        print('header length: ', len(header))
         spaltennr=None
-        for i, column in enumerate(columns):
+        for i, column in enumerate(header):
             print(f'Index: {i}, Spaltenname: {column}')
             if 'Drücke' in column:
-              spaltennr=i
+                spaltennr=i
         if spaltennr is None:
             print("Spalte 'Drücke:' wurde nicht gefunden.")
             #return excelVectorGenerator0()
-        print(f"Gefundene Spaltennummer: {spaltennr+1}")
-        print(f'df[index] = {df[spaltennr]}')
+        print(f"Gefundene Spaltennummer: {spaltennr + 1}")
+        pressures = df.iloc[1:, spaltennr].dropna().values
+        print(f"Extrahierte Drücke: {pressures}")
+        return pressures
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
         return excelVectorGenerator0()
 
 
 excelVectorGenerator0()
+# C:\Users\ge96cax\exceldruck\dt.csv
+# C:\Users\ge96cax\exceldruck\drucktabelle1.xlsx
+#
