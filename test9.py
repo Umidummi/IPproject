@@ -81,67 +81,77 @@ def psvDruckKontrolle(i):
             print('Verbindung closed. ')
 
 def excelVectorGenerator1():
-    while True:
-        try:
-            #excelfile = input(r'Bitte gebe den Pfad der Excel- oder CSV-Datei mit den Drücken ein: ')
-            excelfile = r'D:\WIN7\Kirchwehm\dt.csv'
-            # Überprüfen, ob die Datei existiert
-            if not os.path.isfile(excelfile):
-                print("Die Datei wurde nicht gefunden.")
-                continue
+    try:
+        excelfile = input(r'Bitte gebe den Pfad der Excel- oder CSV-Datei mit den Drücken ein: ')
+        #excelfile = r'D:\WIN7\Kirchwehm\dt.csv'
+        # Überprüfen, ob die Datei existiert
+        if not os.path.isfile(excelfile):
+            print("Die Datei wurde nicht gefunden.")
+            return excelVectorGenerator1()
 
-            # Erkennen des Dateiformats anhand der Dateiendung
-            file_extension = excelfile.lower().split('.')[-1]
+        # Erkennen des Dateiformats anhand der Dateiendung
+        file_extension = excelfile.lower().split('.')[-1]
 
-            if file_extension == 'xlsx' or file_extension == 'xls':
-                # Excel-Datei einlesen
-                df = pd.read_excel(excelfile)
-                print("Excel-Datei erfolgreich geladen.")
-            elif file_extension == 'csv': # CSV-Datei einlesen
-                df = pd.read_csv(excelfile)
-                print("CSV-Datei erfolgreich geladen.")
-            else:
-                print("Nur Excel- (.xlsx, .xls) und CSV-Dateien (.csv) werden unterstützt.")
-                excelVectorGenerator1()
-            print("Verfügbare Spalten:", df.columns)
-            # Entfernen von führenden/nachfolgenden Leerzeichen in den Spaltenüberschriften
-            df.columns = df.columns.str.strip()
-            # Überprüfen, ob eine der Spalten 'Drücke:' enthält, unabhängig von zusätzlichen Zeichen
-            matching_column = None
-            for column in df.columns:
-                if 'Drücke' in column:  # Suche nach 'Drücke' in der Spaltenüberschrift
-                    matching_column = column
-                    break
+        if file_extension == 'xlsx' or file_extension == 'xls':
+            # Excel-Datei einlesen
+            df = pd.read_excel(excelfile, header=None)
+            print(f'df:\n {df}')
+            print("Excel-Datei erfolgreich geladen.")
+            #df.columns = header
+            #print(f"Erste Zeilen der Datei:\n{df.head()}")
+        elif file_extension == 'csv': # CSV-Datei einlesen
+            trennzeichen=input('Bitte gebe das Trennsymbol der CSV datei ein.')
+            df = pd.read_csv(excelfile, sep=trennzeichen, encoding='latin1')
+            print(f'df: {df}')
+            print("CSV-Datei erfolgreich geladen.")
+        else:
+            print("Nur Excel- (.xlsx, .xls) und CSV-Dateien (.csv) werden unterstützt.")
+            return excelVectorGenerator1()
 
-            if matching_column is None:
-                print("Spalte 'Drücke:' wurde nicht gefunden.")
-                continue
+        #print(f"Erste Zeilen der Datei:\n{df.head()}")
 
-            print(f"Gefundene Spalte: {matching_column}")
-
-            # Werte der 'Drücke:;;Zeitsabstände:'-Spalte aufteilen und nur die Druckwerte extrahieren
-            druckwerte = []
-            for value in df[matching_column]:
-                # Zelle nach ';;' aufteilen und nur den ersten Teil (Druckwert) nehmen
-                split_values = value.split(';;')
-                druckwert = split_values[0]  # Der Druckwert (erste Zahl)
-
-                # Überprüfen, ob der Wert numerisch ist
-                try:
-                    # Versuche, den Wert in eine Zahl zu konvertieren
-                    float(druckwert)  # Wenn erfolgreich, ist es ein gültiger Druckwert
-                    druckwerte.append(druckwert)  # Füge den Druckwert hinzu
-                except ValueError:
-                    # Wenn der Wert keine Zahl ist, überspringe ihn
+        rownum = df.shape[0]
+        print('Anzahl der Zeilen: ', rownum)
+        zeilenstart = None
+        spaltennr = None
+        for i in range(rownum):
+            print(f"Row {i}: {df.iloc[i]}")
+            row = df.iloc[i].tolist()
+            print('Reihenelemente: ', row)
+            for index,j in enumerate(row):
+                if type(j)==int:
                     continue
+                elif type(j)==str:
+                    if 'Drücke' in j:
+                        header = row
+                        zeilenstart = i
+                        spaltennr= index
+                        break
+            if spaltennr == None and zeilenstart == None:
+                    print(f'in der Zeile {i} wurde es nicht gefunden')
+            else:
+                break
+        if spaltennr == None and zeilenstart == None:
+            print("Spalte 'Drücke:' wurde nicht gefunden.")
+            return excelVectorGenerator1()
+        print('Zeilennummer mit Drücke: ', zeilenstart)
+        print('Spaltennummer mit Drücke: ', spaltennr+1)
+        print("Spaltennamen:", header)
+        print('header length: ', len(header))
+        pressures = df.iloc[zeilenstart:, spaltennr].dropna().values
+        numpressure=[]
+        for i in pressures:
+            try:
+                numvalue=float(i)
+                numpressure.append(numvalue)
+            except ValueError:
+                continue
 
-            print(f"Druckwerte: {druckwerte}")
-            return druckwerte  # Rückgabe der Liste mit den Druckwerten
-
-        except Exception as e:
-            print(f"Ein Fehler ist aufgetreten: {e}")
-            continue
-
+        print(f"Extrahierte Drücke: {numpressure}")
+        return numpressure
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+        return excelVectorGenerator1()
 
 def druckabfrage(ser, counter): #in dieser funktion pendelt es den Druck auf die neue Vorgabe ein
     gp = 'GP\r'

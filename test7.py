@@ -1,6 +1,9 @@
 import pandas as pd
 import os
 
+from pywin.framework.interact import valueFormatOutputError
+
+
 def excelVectorGenerator0():
     try:
         excelfile = input(r'Bitte gebe den Pfad der Excel- oder CSV-Datei mit den Drücken ein: ')
@@ -18,41 +21,58 @@ def excelVectorGenerator0():
             df = pd.read_excel(excelfile, header=None)
             print(f'df:\n {df}')
             print("Excel-Datei erfolgreich geladen.")
-            rownum = df.shape[0]
-            print('Anzahl der Zeilen: ',rownum)
-            for i in range(rownum):
-                row=df.iloc[i].tolist()
-                if 'Drücke' in row:
-                    header = row
-            df.columns = header
-            print(f"Erste Zeilen der Datei:\n{df.head()}")
+            #df.columns = header
+            #print(f"Erste Zeilen der Datei:\n{df.head()}")
         elif file_extension == 'csv': # CSV-Datei einlesen
             trennzeichen=input('Bitte gebe das Trennsymbol der CSV datei ein.')
             df = pd.read_csv(excelfile, sep=trennzeichen, encoding='latin1')
             print(f'df: {df}')
             print("CSV-Datei erfolgreich geladen.")
-            header = df.columns.tolist()
         else:
             print("Nur Excel- (.xlsx, .xls) und CSV-Dateien (.csv) werden unterstützt.")
             return excelVectorGenerator0()
 
         #print(f"Erste Zeilen der Datei:\n{df.head()}")
 
-
+        rownum = df.shape[0]
+        print('Anzahl der Zeilen: ', rownum)
+        zeilenstart = None
+        spaltennr = None
+        for i in range(rownum):
+            print(f"Row {i}: {df.iloc[i]}")
+            row = df.iloc[i].tolist()
+            print('Reihenelemente: ', row)
+            for index,j in enumerate(row):
+                if type(j)==int:
+                    continue
+                elif type(j)==str:
+                    if 'Drücke' in j:
+                        header = row
+                        zeilenstart = i
+                        spaltennr= index
+                        break
+            if spaltennr == None and zeilenstart == None:
+                    print(f'in der Zeile {i} wurde es nicht gefunden')
+            else:
+                break
+        if spaltennr == None and zeilenstart == None:
+            print("Spalte 'Drücke:' wurde nicht gefunden.")
+            return excelVectorGenerator0()
+        print('Zeilennummer mit Drücke: ', zeilenstart)
+        print('Spaltennummer mit Drücke: ', spaltennr+1)
         print("Spaltennamen:", header)
         print('header length: ', len(header))
-        spaltennr=None
-        for i, column in enumerate(header):
-            print(f'Index: {i}, Spaltenname: {column}')
-            if 'Drücke' in column:
-                spaltennr=i
-        if spaltennr is None:
-            print("Spalte 'Drücke:' wurde nicht gefunden.")
-            #return excelVectorGenerator0()
-        print(f"Gefundene Spaltennummer: {spaltennr + 1}")
-        pressures = df.iloc[1:, spaltennr].dropna().values
-        print(f"Extrahierte Drücke: {pressures}")
-        return pressures
+        pressures = df.iloc[zeilenstart:, spaltennr].dropna().values
+        numpressure=[]
+        for i in pressures:
+            try:
+                numvalue=float(i)
+                numpressure.append(numvalue)
+            except ValueError:
+                continue
+
+        print(f"Extrahierte Drücke: {numpressure}")
+        return numpressure
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
         return excelVectorGenerator0()
